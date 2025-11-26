@@ -1,4 +1,3 @@
-
 // Supabase Configuration
 const SUPABASE_URL = 'https://awjntdtvmhgacexuhwvy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3am50ZHR2bWhnYWNleHVod3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MzczNjIsImV4cCI6MjA3NjMxMzM2Mn0.ZfW2BORLTZO4a9bHfFzsMHUnR1VCy9ujptPDxC2tZ_0';
@@ -64,6 +63,7 @@ async function loadLocationsFromSupabase() {
 setTimeout(() => {
     loadLocationsFromSupabase();
 }, 500);
+
 const PATHWAYS = {
   north_main_pathway: {
     name: 'North Main',
@@ -159,7 +159,7 @@ const PATHWAYS = {
     ]
   },
 
-  auditorium_path: {   // 🔥 fixed lowercase
+  auditorium_path: {
     name: 'Auditorium Path',
     coordinates: [
       [126.09350032978199, 8.633647360207476],
@@ -208,7 +208,7 @@ function generatePathDropdownOptions() {
     commission_path: "Building Paths",
     hm_building_path: "Building Paths",
     hm_to_main_path: "Building Paths",
-    auditorium_path: "Building Paths", // lowercase fixed
+    auditorium_path: "Building Paths",
 
     main_registrar_connector: "Connectors",
     registrar_direct_path: "Connectors",
@@ -238,8 +238,6 @@ function generatePathDropdownOptions() {
 }
 
 generatePathDropdownOptions();
-
-
 
 // Image compression function
 function compressImage(file, maxWidth, quality) {
@@ -309,10 +307,15 @@ function updateImagePreview() {
         div.className = 'image-preview-item';
         div.innerHTML = `
             <img src="${img}" alt="Preview ${index + 1}">
-            <button class="image-remove-btn" onclick="removeImage(${index})">×</button>
+            <button class="image-remove-btn" onclick="removeImage(${index})">
+                <i data-lucide="x"></i>
+            </button>
         `;
         preview.appendChild(div);
     });
+    
+    // Reinitialize lucide icons
+    lucide.createIcons();
 }
 
 function removeImage(index) {
@@ -354,7 +357,7 @@ function highlightPaths(pathIds) {
 
         // Highlight main line
         allPathLayers[pathId].setStyle({
-            color: '#FFD523',   // yellow
+            color: '#FFD523',
             weight: 6,
             opacity: 1,
             dashArray: null
@@ -381,8 +384,8 @@ function highlightPaths(pathIds) {
     }
 }
 
-
 initializePathways();
+
 function updateRouteFields() {
     const routeCount = parseInt(document.getElementById('routeCount').value);
     const secondPathGroup = document.getElementById('secondPathGroup');
@@ -424,6 +427,7 @@ function updateRouteFields() {
     updatePathHighlighting();
     updateSubmitButton();
 }
+
 function updatePathHighlighting() {
     const routeCount = parseInt(document.getElementById('routeCount').value);
     const path1 = document.getElementById('connectedPath').value;
@@ -443,7 +447,6 @@ function updatePathHighlighting() {
         highlightPaths([]);
     }
 }
-
 
 document.getElementById('connectedPath').addEventListener('change', function() {
     updatePathHighlighting();
@@ -467,31 +470,79 @@ document.getElementById('connectedPath4').addEventListener('change', function() 
 
 function setLocationMethod(m) {
     locationMethod = m;
-    document.getElementById('mapBtn').classList.toggle('active', m === 'map');
-    document.getElementById('locationBtn').classList.toggle('active', m === 'location');
-    if (m === 'location') useLocation();
-    else { if (currentMarker) { map.removeLayer(currentMarker); currentMarker = null; } selectedCoords = null; document.getElementById('latDisplay').textContent = 'Click map'; document.getElementById('lngDisplay').textContent = 'or use Location'; updateSubmitButton(); }
+    const mapBtn = document.getElementById('mapBtn');
+    const locationBtn = document.getElementById('locationBtn');
+    
+    mapBtn.classList.toggle('active', m === 'map');
+    locationBtn.classList.toggle('active', m === 'location');
+    
+    if (m === 'location') {
+        useLocation();
+    } else {
+        if (currentMarker) {
+            map.removeLayer(currentMarker);
+            currentMarker = null;
+        }
+        selectedCoords = null;
+        document.getElementById('latDisplay').textContent = 'Click map';
+        document.getElementById('lngDisplay').textContent = 'or use Location';
+        updateSubmitButton();
+    }
 }
 
 function useLocation() {
-    const btn = document.getElementById('locationBtn'); btn.textContent = '📍...';
-    if (!navigator.geolocation) { alert('Location not available'); btn.textContent = '📍 Location'; return; }
+    const btn = document.getElementById('locationBtn');
+    btn.innerHTML = '<i data-lucide="loader-2" class="icon-sm" style="animation: spin 1s linear infinite;"></i> Locating...';
+    lucide.createIcons();
+    
+    if (!navigator.geolocation) {
+        alert('Location not available');
+        btn.innerHTML = '<i data-lucide="navigation" class="icon-sm"></i> Location';
+        lucide.createIcons();
+        return;
+    }
+    
     navigator.geolocation.getCurrentPosition(pos => {
-        const { latitude: lat, longitude: lng } = pos.coords; selectedCoords = { lat, lng };
+        const { latitude: lat, longitude: lng } = pos.coords;
+        selectedCoords = { lat, lng };
+        
         if (currentMarker) map.removeLayer(currentMarker);
-        currentMarker = L.marker([lat, lng], { icon: L.divIcon({ html: '<div style="background:linear-gradient(135deg,#FFD523,#FF6B6B);width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>', iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(map);
+        currentMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                html: '<div style="background:linear-gradient(135deg,#FFD523,#FF6B6B);width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            })
+        }).addTo(map);
+        
         map.setView([lat, lng], 19);
         document.getElementById('latDisplay').textContent = lat.toFixed(7);
         document.getElementById('lngDisplay').textContent = lng.toFixed(7);
-        btn.textContent = '📍 ✓'; updateSubmitButton();
-    }, () => { alert('Location failed'); btn.textContent = '📍 Location'; }, { enableHighAccuracy: true, timeout: 10000 });
+        
+        btn.innerHTML = '<i data-lucide="check-circle" class="icon-sm"></i> Located';
+        lucide.createIcons();
+        updateSubmitButton();
+    }, () => {
+        alert('Location failed');
+        btn.innerHTML = '<i data-lucide="navigation" class="icon-sm"></i> Location';
+        lucide.createIcons();
+    }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
 map.on('click', e => {
     if (locationMethod !== 'map') return;
-    const { lat, lng } = e.latlng; selectedCoords = { lat, lng };
+    const { lat, lng } = e.latlng;
+    selectedCoords = { lat, lng };
+    
     if (currentMarker) map.removeLayer(currentMarker);
-    currentMarker = L.marker([lat, lng], { icon: L.divIcon({ html: '<div style="background:#FFD523;width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>', iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(map);
+    currentMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+            html: '<div style="background:#FFD523;width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        })
+    }).addTo(map);
+    
     document.getElementById('latDisplay').textContent = lat.toFixed(7);
     document.getElementById('lngDisplay').textContent = lng.toFixed(7);
     updateSubmitButton();
@@ -510,13 +561,13 @@ function updateSubmitButton() {
     document.getElementById('submitBtn').disabled = !(form.checkValidity() && selectedCoords && allPathsValid);
 }
 
-document.querySelectorAll('#locationForm input, #locationForm select, #locationForm textarea').forEach(el => { 
-    el.addEventListener('input', updateSubmitButton); 
-    el.addEventListener('change', updateSubmitButton); 
+document.querySelectorAll('#locationForm input, #locationForm select, #locationForm textarea').forEach(el => {
+    el.addEventListener('input', updateSubmitButton);
+    el.addEventListener('change', updateSubmitButton);
 });
 
 document.getElementById('locationForm').addEventListener('submit', async function(e) {
-    e.preventDefault(); 
+    e.preventDefault();
     if (!selectedCoords) return alert('Select location');
     
     const routeCount = parseInt(document.getElementById('routeCount').value);
@@ -530,7 +581,7 @@ document.getElementById('locationForm').addEventListener('submit', async functio
     if (routeCount >= 3 && path3) paths.push(path3);
     if (routeCount >= 4 && path4) paths.push(path4);
     
-const connectedPath = paths;  // <-- real array
+    const connectedPath = paths;
     
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
@@ -538,15 +589,16 @@ const connectedPath = paths;  // <-- real array
     try {
         if (editingLocationId) {
             // UPDATE MODE
-            submitBtn.textContent = 'Updating...';
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="icon-sm" style="animation: spin 1s linear infinite;"></i> Updating...';
+            lucide.createIcons();
             
             const locData = {
-                name: document.getElementById('locationName').value.trim() || 'Unnamed Location', 
+                name: document.getElementById('locationName').value.trim() || 'Unnamed Location',
                 building: document.getElementById('building').value || 'Unknown Building',
-    connected_path: connectedPath.length > 0 ? connectedPath : ['main_pathway'],  // ✅ NEW - always returns array
+                connected_path: connectedPath.length > 0 ? connectedPath : ['main_pathway'],
                 type: document.getElementById('locationType').value || 'room',
-                floor: document.getElementById('floor').value || 'Ground Floor', 
-                category: document.getElementById('category').value || 'location', 
+                floor: document.getElementById('floor').value || 'Ground Floor',
+                category: document.getElementById('category').value || 'location',
                 access_type: document.getElementById('accessType').value || 'internal',
                 dual_pathways: routeCount > 1,
                 description: document.getElementById('description').value.trim() || '',
@@ -565,7 +617,8 @@ const connectedPath = paths;  // <-- real array
                 console.error('Supabase error:', error);
                 alert('Error updating database: ' + error.message);
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Update Location';
+                submitBtn.innerHTML = '<i data-lucide="save" class="icon-sm"></i> Update Location';
+                lucide.createIcons();
                 return;
             }
             
@@ -604,16 +657,17 @@ const connectedPath = paths;  // <-- real array
             
         } else {
             // INSERT MODE
-            submitBtn.textContent = 'Saving...';
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="icon-sm" style="animation: spin 1s linear infinite;"></i> Saving...';
+            lucide.createIcons();
             
             const locData = {
                 id: `loc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                name: document.getElementById('locationName').value.trim() || 'Unnamed Location', 
+                name: document.getElementById('locationName').value.trim() || 'Unnamed Location',
                 building: document.getElementById('building').value || 'Unknown Building',
-                connected_path: connectedPath || 'main_pathway', 
+                connected_path: connectedPath || 'main_pathway',
                 type: document.getElementById('locationType').value || 'room',
-                floor: document.getElementById('floor').value || 'Ground Floor', 
-                category: document.getElementById('category').value || 'location', 
+                floor: document.getElementById('floor').value || 'Ground Floor',
+                category: document.getElementById('category').value || 'location',
                 access_type: document.getElementById('accessType').value || 'internal',
                 dual_pathways: routeCount > 1,
                 description: document.getElementById('description').value.trim() || '',
@@ -631,7 +685,8 @@ const connectedPath = paths;  // <-- real array
                 console.error('Supabase error:', error);
                 alert('Error saving to database: ' + error.message);
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Add Location';
+                submitBtn.innerHTML = '<i data-lucide="plus" class="icon-sm"></i> Add Location';
+                lucide.createIcons();
                 return;
             }
             
@@ -650,19 +705,20 @@ const connectedPath = paths;  // <-- real array
                 coordinates: [locData.longitude, locData.latitude]
             };
             
-            locations.push(loc); 
-            addLocationToList(loc); 
-            addPermanentMarker(loc); 
+            locations.push(loc);
+            addLocationToList(loc);
+            addPermanentMarker(loc);
             alert('✓ Location saved successfully!');
         }
         
-        clearForm(); 
+        clearForm();
         
     } catch (err) {
         console.error('Error:', err);
         alert('Failed to save location. Please try again.');
         submitBtn.disabled = false;
-        submitBtn.textContent = editingLocationId ? 'Update Location' : 'Add Location';
+        submitBtn.innerHTML = editingLocationId ? '<i data-lucide="save" class="icon-sm"></i> Update Location' : '<i data-lucide="plus" class="icon-sm"></i> Add Location';
+        lucide.createIcons();
     }
 });
 
@@ -670,7 +726,7 @@ document.getElementById('clearBtn').addEventListener('click', clearForm);
 
 function clearForm() {
     document.getElementById('locationForm').reset();
-    document.getElementById('latDisplay').textContent = 'Click map'; 
+    document.getElementById('latDisplay').textContent = 'Click map';
     document.getElementById('lngDisplay').textContent = 'or use Location';
     document.getElementById('routeCount').value = '1';
     document.getElementById('secondPathGroup').style.display = 'none';
@@ -681,25 +737,29 @@ function clearForm() {
     document.getElementById('connectedPath4').required = false;
     uploadedImages = [];
     updateImagePreview();
-    if (currentMarker) { map.removeLayer(currentMarker); currentMarker = null; }
-    selectedCoords = null; 
-    highlightPaths([]); 
+    if (currentMarker) {
+        map.removeLayer(currentMarker);
+        currentMarker = null;
+    }
+    selectedCoords = null;
+    highlightPaths([]);
     updateSubmitButton();
     
     // Reset edit mode
     editingLocationId = null;
     document.getElementById('editModeBanner').style.display = 'none';
-    document.getElementById('submitBtn').textContent = 'Add Location';
+    document.getElementById('submitBtn').innerHTML = '<i data-lucide="plus" class="icon-sm"></i> Add Location';
+    lucide.createIcons();
 }
 
 function addPermanentMarker(loc) {
     const color = typeColors[loc.type] || '#3C9AFB';
-    const marker = L.marker([loc.coordinates[1], loc.coordinates[0]], { 
-        icon: L.divIcon({ 
-            html: `<div style="background:${color};width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`, 
-            iconSize: [22, 22], 
-            iconAnchor: [11, 11] 
-        }) 
+    const marker = L.marker([loc.coordinates[1], loc.coordinates[0]], {
+        icon: L.divIcon({
+            html: `<div style="background:${color};width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+        })
     }).addTo(map);
     marker.bindPopup(`<b>${loc.name}</b><br>${loc.building}<br>${loc.floor}<br><i>${loc.access_type}</i>`);
     loc.marker = marker;
@@ -711,13 +771,42 @@ function addLocationToList(loc) {
     
     const pathDisplay = Array.isArray(loc.connected_path) ? loc.connected_path.join(' + ') : loc.connected_path;
     
-    const imagesHTML = loc.images && loc.images.length > 0 ? 
+    const imagesHTML = loc.images && loc.images.length > 0 ?
         `<div class="location-images">${loc.images.map(img => `<img src="${img}" alt="Location image">`).join('')}</div>` : '';
     
-    const item = document.createElement('div'); 
+    const item = document.createElement('div');
     item.className = 'location-item';
-    item.innerHTML = `<div class="location-item-header"><div><h4>${loc.name}</h4><span class="badge">${loc.type.toUpperCase()}</span><span class="badge category">${loc.category.toUpperCase()}</span><span class="badge access">${loc.access_type.toUpperCase()}</span></div><div><button class="btn-edit" onclick="editLocation('${loc.id}')">✏️ Edit</button><button class="btn-delete" onclick="deleteLocation('${loc.id}')">✕</button></div></div><p><b>Building:</b> ${loc.building} | <b>Floor:</b> ${loc.floor}</p><p><b>Path:</b> ${pathDisplay}</p>${loc.dual_pathways ? '<p>✓ Dual Pathways</p>' : ''}${loc.description ? `<p>${loc.description}</p>` : ''}${imagesHTML}<p style="font-size:0.65rem;color:#9ca3af">[${loc.coordinates[0].toFixed(6)}, ${loc.coordinates[1].toFixed(6)}]</p>`;
+    item.innerHTML = `
+        <div class="location-item-header">
+            <div>
+                <h4><i data-lucide="map-pin" class="icon-sm"></i> ${loc.name}</h4>
+                <span class="badge">${loc.type.toUpperCase()}</span>
+                <span class="badge category">${loc.category.toUpperCase()}</span>
+                <span class="badge access">${loc.access_type.toUpperCase()}</span>
+            </div>
+            <div>
+                <button class="btn-edit" onclick="editLocation('${loc.id}')">
+                    <i data-lucide="edit-2" class="icon-sm"></i> Edit
+                </button>
+                <button class="btn-delete" onclick="deleteLocation('${loc.id}')">
+                    <i data-lucide="trash-2" class="icon-sm"></i>
+                </button>
+            </div>
+        </div>
+        <p><b>Building:</b> ${loc.building} | <b>Floor:</b> ${loc.floor}</p>
+        <p><b>Path:</b> ${pathDisplay}</p>
+        ${loc.dual_pathways ? '<p><i data-lucide="route" class="icon-sm"></i> Dual Pathways</p>' : ''}
+        ${loc.description ? `<p>${loc.description}</p>` : ''}
+        ${imagesHTML}
+        <p style="font-size:0.65rem;color:#9ca3af">
+            <i data-lucide="crosshair" class="icon-sm"></i> [${loc.coordinates[0].toFixed(6)}, ${loc.coordinates[1].toFixed(6)}]
+        </p>
+    `;
     list.appendChild(item);
+    
+    // Initialize lucide icons
+    lucide.createIcons();
+    
     document.getElementById('locationCount').textContent = locations.length;
 }
 
@@ -725,16 +814,16 @@ function deleteLocation(id) {
     if (!confirm('Are you sure you want to delete this location?')) return;
     
     const i = locations.findIndex(l => l.id === id);
-    if (i !== -1) { 
+    if (i !== -1) {
         // Delete from Supabase
         deleteFromSupabase(id);
         
         // Remove marker from map
-        if (locations[i].marker) map.removeLayer(locations[i].marker); 
+        if (locations[i].marker) map.removeLayer(locations[i].marker);
         
         // Remove from local array
-        locations.splice(i, 1); 
-        rebuildList(); 
+        locations.splice(i, 1);
+        rebuildList();
     }
 }
 
@@ -745,7 +834,8 @@ function editLocation(id) {
     // Set editing mode
     editingLocationId = id;
     document.getElementById('editModeBanner').style.display = 'block';
-    document.getElementById('submitBtn').textContent = 'Update Location';
+    document.getElementById('submitBtn').innerHTML = '<i data-lucide="save" class="icon-sm"></i> Update Location';
+    lucide.createIcons();
     
     // Populate form fields
     document.getElementById('locationName').value = loc.name;
@@ -762,7 +852,7 @@ function editLocation(id) {
         document.getElementById('routeCount').value = pathCount.toString();
         
         // First set the route count visibility
-        updateRouteFields();  // <-- ADDED THIS LINE
+        updateRouteFields();
         
         // Then populate the path values
         document.getElementById('connectedPath').value = loc.connected_path[0] || '';
@@ -785,7 +875,7 @@ function editLocation(id) {
         }, 100);
     } else {
         document.getElementById('routeCount').value = '1';
-        updateRouteFields();  // <-- ADDED THIS LINE
+        updateRouteFields();
         document.getElementById('connectedPath').value = loc.connected_path;
         setTimeout(() => {
             highlightPaths([loc.connected_path]);
@@ -799,12 +889,12 @@ function editLocation(id) {
     
     // Update marker
     if (currentMarker) map.removeLayer(currentMarker);
-    currentMarker = L.marker([selectedCoords.lat, selectedCoords.lng], { 
-        icon: L.divIcon({ 
-            html: '<div style="background:#3C9AFB;width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>', 
-            iconSize: [28, 28], 
-            iconAnchor: [14, 14] 
-        }) 
+    currentMarker = L.marker([selectedCoords.lat, selectedCoords.lng], {
+        icon: L.divIcon({
+            html: '<div style="background:#3C9AFB;width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        })
     }).addTo(map);
     
     // Set images
@@ -846,32 +936,47 @@ function rebuildList() {
 }
 
 function exportData() {
-    const geojson = { 
-        type: 'FeatureCollection', 
-        features: locations.map(({ marker, ...l }) => ({ 
-            type: 'Feature', 
-            properties: { 
-                id: l.id, 
-                name: l.name, 
-                building: l.building, 
-                connected_path: l.connected_path, 
-                type: l.type, 
-                floor: l.floor, 
-                category: l.category, 
-                access_type: l.access_type, 
-                ...(l.dual_pathways && { dual_pathways: true }), 
+    const geojson = {
+        type: 'FeatureCollection',
+        features: locations.map(({ marker, ...l }) => ({
+            type: 'Feature',
+            properties: {
+                id: l.id,
+                name: l.name,
+                building: l.building,
+                connected_path: l.connected_path,
+                type: l.type,
+                floor: l.floor,
+                category: l.category,
+                access_type: l.access_type,
+                ...(l.dual_pathways && { dual_pathways: true }),
                 ...(l.description && { description: l.description }),
                 ...(l.images && { images: l.images })
-            }, 
-            geometry: { 
-                type: 'Point', 
-                coordinates: l.coordinates 
-            } 
-        })) 
+            },
+            geometry: {
+                type: 'Point',
+                coordinates: l.coordinates
+            }
+        }))
     };
     const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a'); 
-    link.href = URL.createObjectURL(blob); 
-    link.download = 'campus_locations.geojson'; 
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'campus_locations.geojson';
     link.click();
 }
+
+// Add CSS for spin animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
+// Initialize icons on page load
+document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+});

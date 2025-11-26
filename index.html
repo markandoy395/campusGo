@@ -7,26 +7,56 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-   <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .icon {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        .icon-sm {
+            width: 16px;
+            height: 16px;
+        }
+        .icon-lg {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>📍 Campus Location Manager</h1>
+        <h1>
+            <i data-lucide="map-pin" class="icon-lg"></i>
+            Campus Location Manager
+        </h1>
         <p>Click on map or use Location • Select path to preview on map</p>
-        <button class="export-btn" onclick="exportData()">📥 Export</button>
+        <button class="export-btn" onclick="exportData()">
+            <i data-lucide="download" class="icon-sm"></i>
+            Export
+        </button>
     </header>
     <div class="container">
         <div id="map"></div>
         <div class="sidebar">
             <div class="form-section">
                 <div id="editModeBanner" style="display:none;" class="edit-mode-banner">
-                    ✏️ Editing Mode - Update location details
+                    <i data-lucide="alert-circle" class="icon-sm"></i>
+                    Editing Mode - Update location details
                 </div>
                 <form id="locationForm">
                     <div class="form-group">
                         <div class="location-button-group">
-                            <button type="button" class="btn-location active" id="mapBtn" onclick="setLocationMethod('map')">🗺️ Map</button>
-                            <button type="button" class="btn-location" id="locationBtn" onclick="setLocationMethod('location')">📍 Location</button>
+                            <button type="button" class="btn-location active" id="mapBtn" onclick="setLocationMethod('map')">
+                                <i data-lucide="map" class="icon-sm"></i>
+                                Map
+                            </button>
+                            <button type="button" class="btn-location" id="locationBtn" onclick="setLocationMethod('location')">
+                                <i data-lucide="navigation" class="icon-sm"></i>
+                                Location
+                            </button>
                         </div>
                     </div>
                     <div class="form-row">
@@ -61,26 +91,18 @@
                         <div class="form-group"><label>Type <span class="required">*</span></label>
 <select id="locationType" required>
     <option value="">Select</option>
-
-    <!-- CLASSROOMS & ACADEMICS -->
     <option value="classroom">Classroom</option>
     <option value="laboratory">Laboratory</option>
     <option value="computer_lab">Computer Lab</option>
     <option value="lecture_hall">Lecture Hall</option>
-
-    <!-- OFFICES & ADMIN -->
     <option value="office">Office</option>
     <option value="department_office">Department Office</option>
     <option value="admin_office">Administrative Office</option>
-
-    <!-- CAMPUS FACILITIES -->
     <option value="facility">Facility</option>
     <option value="library">Library</option>
     <option value="canteen">Canteen</option>
     <option value="clinic">Clinic</option>
     <option value="auditorium">Auditorium</option>
-
-    <!-- GENERAL CAMPUS LOCATIONS -->
     <option value="building_entrance">Building Entrance</option>
     <option value="gate">Campus Gate</option>
     <option value="restroom">Restroom</option>
@@ -92,20 +114,14 @@
                         <div class="form-group"><label>Category <span class="required">*</span></label>
 <select id="category" required>
     <option value="">Select</option>
-
-    <!-- CORE MAP CATEGORIES -->
     <option value="location">Location</option>
     <option value="building">Building</option>
     <option value="pathway">Pathway</option>
     <option value="entrance">Entrance</option>
-
-    <!-- CAMPUS-SPECIFIC GROUPS -->
     <option value="academic">Academic Area</option>
     <option value="administrative">Administrative Area</option>
     <option value="facility">Campus Facility</option>
     <option value="service">Student Service</option>
-
-    <!-- OUTDOOR & SPECIAL -->
     <option value="landmark">Landmark</option>
     <option value="outdoor">Outdoor Area</option>
 </select>
@@ -117,9 +133,10 @@
                     <div class="form-group">
                         <label>Connected Path <span class="required">*</span></label>
                     <select id="connectedPath" required></select>
-
-
-                        <p class="path-hint">🗺️ Click to preview path on map</p>
+                        <p class="path-hint">
+                            <i data-lucide="route" class="icon-sm"></i>
+                            Click to preview path on map
+                        </p>
                     </div>
                     <div class="form-group">
                         <label>Number of Routes</label>
@@ -133,28 +150,34 @@
                     <div class="form-group" id="secondPathGroup" style="display:none;">
                         <label>Second Path <span class="required">*</span></label>
                        <select id="connectedPath2"></select>
-         <p class="path-hint">🗺️ All paths will be highlighted</p>
+         <p class="path-hint">
+             <i data-lucide="route" class="icon-sm"></i>
+             All paths will be highlighted
+         </p>
                     </div>
                     <div class="form-group" id="thirdPathGroup" style="display:none;">
                         <label>Third Path <span class="required">*</span></label>
                       <select id="connectedPath3"></select>
-
-
-                        <p class="path-hint">🗺️ All paths will be highlighted</p>
+                        <p class="path-hint">
+                            <i data-lucide="route" class="icon-sm"></i>
+                            All paths will be highlighted
+                        </p>
                     </div>
                     <div class="form-group" id="fourthPathGroup" style="display:none;">
                         <label>Fourth Path <span class="required">*</span></label>
                        <select id="connectedPath4"></select>
-
-
-                        <p class="path-hint">🗺️ All paths will be highlighted</p>
+                        <p class="path-hint">
+                            <i data-lucide="route" class="icon-sm"></i>
+                            All paths will be highlighted
+                        </p>
                     </div>
                     <div class="form-group"><label>Description</label><textarea id="description" placeholder="Optional details..."></textarea></div>
                     <div class="form-group">
                         <label>Images (Max 4 - Auto-compressed)</label>
                         <div class="image-upload-container">
                             <label for="imageUpload" class="image-upload-label">
-                                📷 Click to upload images
+                                <i data-lucide="image" class="icon"></i>
+                                Click to upload images
                             </label>
                             <input type="file" id="imageUpload" accept="image/*" multiple style="display:none" onchange="handleImageUpload(event)">
                             <p class="image-count"><span id="imageCount">0</span>/4 images</p>
@@ -162,8 +185,14 @@
                         <div id="imagePreview" class="image-preview-grid"></div>
                     </div>
                     <div class="form-group"><label>Coordinates</label><div class="coord-display"><strong>Lat:</strong> <span id="latDisplay">Click map</span> | <strong>Lng:</strong> <span id="lngDisplay">or use Location</span></div></div>
-                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Add Location</button>
-                    <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                        <i data-lucide="plus" class="icon-sm"></i>
+                        Add Location
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="clearBtn">
+                        <i data-lucide="rotate-ccw" class="icon-sm"></i>
+                        Clear
+                    </button>
                 </form>
             </div>
             <div class="locations-list">
@@ -173,5 +202,11 @@
         </div>
     </div>
     <script src="script.js"></script>
+    <script>
+        // Initialize Lucide icons after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
 </body>
 </html>
