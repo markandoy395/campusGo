@@ -587,7 +587,6 @@ document.getElementById('locationForm').addEventListener('submit', async functio
     
     try {
         if (editingLocationId) {
-            // UPDATE MODE
             submitBtn.innerHTML = '<i data-lucide="loader-2" class="icon-sm" style="animation: spin 1s linear infinite;"></i> Updating...';
             lucide.createIcons();
             
@@ -664,8 +663,9 @@ document.getElementById('locationForm').addEventListener('submit', async functio
             const locData = {
                 id: `loc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 name: document.getElementById('locationName').value.trim() || 'Unnamed Location',
-                building: document.getElementById('building').value || 'Unknown Building',
-                connected_path: connectedPath || 'main_pathway',
+ building: document.getElementById('building').value.trim() !== '' 
+        ? document.getElementById('building').value.trim() 
+        : document.getElementById('category').value,                connected_path: connectedPath || 'main_pathway',
                 type: document.getElementById('locationType').value || 'room',
                 floor: document.getElementById('floor').value || 'Ground Floor',
                 category: document.getElementById('category').value || 'location',
